@@ -6,12 +6,13 @@ import (
 )
 
 func FancyLoad(quit chan bool) {
+	defer close(quit)
+
 	wheel := []string{"\\", "|", "/", "-"}
 	var i int
 	for {
 		select {
 		case <-quit:
-			close(quit)
 			return
 		default:
 			fmt.Print("\r[" + wheel[i] + "]")
