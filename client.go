@@ -9,8 +9,6 @@ import (
 	"net/url"
 	"strings"
 
-	"time"
-
 	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
@@ -86,31 +84,15 @@ func (c *Client) Login(email string, password string) (username string, err bool
 func (c *Client) ListBooks() {
 	fmt.Println("Getting books")
 
-	done := false
-	doneChan := make(chan bool)
-
-	go func(doneChan chan bool) {
-		for !done {
-			fmt.Print("\r[\\]")
-			time.Sleep(50 * time.Millisecond)
-			fmt.Print("\r[|]")
-			time.Sleep(50 * time.Millisecond)
-			fmt.Print("\r[/]")
-			time.Sleep(50 * time.Millisecond)
-			fmt.Print("\r[-]")
-			time.Sleep(50 * time.Millisecond)
-		}
-		fmt.Print("\033[2K\r")
-		doneChan <- true
-	}(doneChan)
+	quit := make(chan bool)
+	go FancyLoad(quit)
 
 	resp, _ := c.httpClient.Get("https://www.packtpub.com/account/my-ebooks")
 	htmlByte, _ := ioutil.ReadAll(resp.Body)
-
 	//ioutil.WriteFile("listBooks.html", htmlByte, 0644)
 
-	done = true
-	<-doneChan
+	// Quit goroutine
+	quit <- true
 
 	// check if login was successfull
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(htmlByte))

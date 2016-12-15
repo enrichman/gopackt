@@ -30,13 +30,10 @@ mainloop:
 		case "login":
 			email, pwd := credentials()
 
-			done := false
-			doneChan := make(chan bool)
-
-			go gopackt.FancyLoad(&done, doneChan)
+			quit := make(chan bool)
+			go gopackt.FancyLoad(quit)
 			user, err := pClient.Login(email, pwd)
-			done = true
-			<-doneChan
+			quit <- true
 
 			fmt.Println("User", user, "Error", err)
 

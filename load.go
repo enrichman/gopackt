@@ -5,16 +5,19 @@ import (
 	"time"
 )
 
-func FancyLoad(done *bool, doneChan chan bool) {
-	for !*done {
-		fmt.Print("\r[\\]")
-		time.Sleep(50 * time.Millisecond)
-		fmt.Print("\r[|]")
-		time.Sleep(50 * time.Millisecond)
-		fmt.Print("\r[/]")
-		time.Sleep(50 * time.Millisecond)
-		fmt.Print("\r[-]")
-		time.Sleep(50 * time.Millisecond)
+func FancyLoad(quit chan bool) {
+	wheel := []string{"\\", "|", "/", "-"}
+	var i int
+	for {
+		select {
+		case <-quit:
+			close(quit)
+			return
+		default:
+			fmt.Print("\r[" + wheel[i] + "]")
+			i = (i + 1) % len(wheel)
+			time.Sleep(50 * time.Millisecond)
+		}
+		fmt.Print("\033[2K\r")
 	}
-	doneChan <- true
 }
